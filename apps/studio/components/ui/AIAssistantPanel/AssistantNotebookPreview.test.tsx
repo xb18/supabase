@@ -91,4 +91,25 @@ describe('AssistantNotebookPreview', () => {
 
     expect(screen.getByText('Show 2 more cells')).toBeInTheDocument()
   })
+
+  it('renders run results inside their matching minified notebook cell', () => {
+    const entries: NotebookCellDiffEntry[] = [
+      { _tag: 'unchanged', cell: wireDatabaseCell('cell-1') },
+    ]
+
+    const { container } = render(
+      <AssistantNotebookPreview
+        entries={entries}
+        mode="run"
+        title="Signup funnel"
+        results={{ 'cell-1': { rows: [] } }}
+      />
+    )
+
+    expect(screen.getByText('Signup funnel')).toBeInTheDocument()
+    expect(screen.getByText('1 cell')).toBeInTheDocument()
+    expect(screen.getByText('Success. No rows returned')).toBeInTheDocument()
+    expect(screen.getByText('0 rows')).toBeInTheDocument()
+    expect(container.querySelector('[data-slot="explorer-query-results"]')).toBeInTheDocument()
+  })
 })
