@@ -200,13 +200,12 @@ describe('NotebookProposalRenderer', () => {
     )
   })
 
-  it('shows the notebook action after an automatic update succeeds', async () => {
-    mockContentItem(mockNotebookRow())
-
+  it('renders a stable update summary after success instead of diffing against live content', () => {
     render(
       <NotebookProposalRenderer
         mode="update"
         state="output-available"
+        confirmState="success"
         input={{
           id: NOTEBOOK_ID,
           expected_updated_at: '2024-01-01T00:00:00.000Z',
@@ -216,7 +215,10 @@ describe('NotebookProposalRenderer', () => {
       />
     )
 
-    expect(await screen.findByRole('link', { name: 'Open notebook' })).toHaveAttribute(
+    expect(screen.getByText('Notebook updated: Signup funnel')).toBeInTheDocument()
+    expect(screen.queryByText("This update can't be applied as written")).not.toBeInTheDocument()
+    expect(screen.queryByRole('toolbar', { name: 'Notebook toolbar' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Open notebook' })).toHaveAttribute(
       'href',
       `/project/default/explorer/notebook/${NOTEBOOK_ID}`
     )

@@ -75,6 +75,14 @@ const MODE_COPY = {
 export const NotebookProposalRenderer = (props: NotebookProposalRendererProps) => {
   const { ref } = useParams()
   const { mode, state, input, output, confirmState, onApprove, onDeny } = props
+
+  if (
+    mode === 'update' &&
+    (state === 'output-available' || state === 'output-error' || state === 'output-denied')
+  ) {
+    return <UpdateNotebookTerminalSummary state={state} output={output} />
+  }
+
   const parsedOutput = notebookToolOutputSchema.safeParse(output)
   const footerAction =
     state === 'output-available' && parsedOutput.success && ref ? (
@@ -109,6 +117,35 @@ export const NotebookProposalRenderer = (props: NotebookProposalRendererProps) =
       {proposal}
       {confirmState === undefined && footerAction}
     </>
+  )
+}
+
+function UpdateNotebookTerminalSummary({
+  state,
+  output,
+}: Pick<NotebookProposalRendererProps, 'state' | 'output'>) {
+  const { ref } = useParams()
+  const parsedOutput = notebookToolOutputSchema.safeParse(output)
+  const label =
+    state === 'output-available'
+      ? parsedOutput.success
+        ? `Notebook updated: ${parsedOutput.data.name}`
+        : 'Notebook updated'
+      : state === 'output-error'
+        ? 'Failed to update notebook'
+        : 'Skipped notebook update'
+
+  return (
+    <div className="flex items-center justify-between gap-2 my-2 mx-4 px-3 py-1.5 text-sm border rounded-md bg-surface-75">
+      <span className="text-foreground-light truncate">{label}</span>
+      {state === 'output-available' && parsedOutput.success && ref && (
+        <Button asChild variant="default" size="tiny">
+          <Link href={`/project/${ref}/explorer/notebook/${parsedOutput.data.id}`}>
+            Open notebook
+          </Link>
+        </Button>
+      )}
+    </div>
   )
 }
 
